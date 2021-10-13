@@ -76,7 +76,7 @@ int main(void) {
 	GPIOA_PUPDR_REG &= ~(0x3 << 8);
 
 	EDGE_TYPE oldEdgeType = EDGE_TYPE_NONE;
-	uint8_t sample = 10;
+	uint8_t sample = 5;
 	uint8_t ledOldState = 0;
 	while (1) {
 		uint8_t pinState = BUTTON_GET_STATE;
@@ -88,7 +88,7 @@ int main(void) {
 				LED_ON;
 			ledOldState = ledOldState == 0 ? 1 : 0;
 		}
-		LL_mDelay(50);
+//		LL_mDelay(50);
 	}
 
 }
@@ -104,11 +104,12 @@ EDGE_TYPE edgeDetect(uint8_t pin_state, uint8_t samples) {
 		if (followEdge > -1 && followEdge < samples) {
 			followEdge = oldPinState == pin_state ? followEdge + 1 : -1;
 		}
-		else if (followEdge >= samples) {
+		if (followEdge >= samples) {
 			if (pin_state == 1)
 				result = EDGE_TYPE_RISE;
 			else
 				result = EDGE_TYPE_FALL;
+			followEdge = -1;
 		}
 	}
 	return result;
