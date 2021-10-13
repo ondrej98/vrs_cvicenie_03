@@ -22,6 +22,9 @@
 #include "main.h"
 #include "assignment.h"
 
+uint8_t oldPinState = 0;
+int8_t followEdge = -1;
+
 int main(void) {
 	/*
 	 *  DO NOT WRITE TO THE WHOLE REGISTER!!!
@@ -71,28 +74,45 @@ int main(void) {
 	GPIOA_PUPDR_REG |= (1 << 6);
 	//Set no pull for GPIOA pin 4
 	GPIOA_PUPDR_REG &= ~(0x3 << 8);
+
+	EDGE_TYPE oldEdgeType = EDGE_TYPE_NONE;
+	uint8_t sample = 10;
+	uint8_t ledOldState = 0;
 	while (1) {
-		if (BUTTON_GET_STATE) {
-			// 0.25s delay
-			LL_mDelay(250);
-			LED_ON;
-			// 0.25s delay
-			LL_mDelay(250);
-			LED_OFF;
-		} else {
-			// 1s delay
-			LL_mDelay(1000);
-			LED_ON;
-			// 1s delay
-			LL_mDelay(1000);
-			LED_OFF;
+		uint8_t pinState = BUTTON_GET_STATE;
+		oldEdgeType = edgeDetect(pinState, sample);
+		if (oldEdgeType == EDGE_TYPE_RISE) {
+			if (ledOldState)
+				LED_OFF;
+			else
+				LED_ON;
+			ledOldState = ledOldState == 0 ? 1 : 0;
 		}
+		LL_mDelay(50);
 	}
 
 }
 
 /* USER CODE BEGIN 4 */
-
+EDGE_TYPE edgeDetect(uint8_t pin_state, uint8_t samples) {
+	EDGE_TYPE result = EDGE_TYPE_NONE;
+	if (pin_state == 0 || pin_state == 1) {
+		if (pin_state != oldPinState) {
+			oldPinState = pin_state;
+			followEdge = 0;
+		}
+		if (followEdge > -1 && followEdge < samples) {
+			followEdge = oldPinState == pin_state ? followEdge + 1 : -1;
+		}
+		else if (followEdge >= samples) {
+			if (pin_state == 1)
+				result = EDGE_TYPE_RISE;
+			else
+				result = EDGE_TYPE_FALL;
+		}
+	}
+	return result;
+}
 /* USER CODE END 4 */
 
 /**

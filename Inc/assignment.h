@@ -46,5 +46,16 @@
 
 #define BUTTON_GET_STATE		!(*((volatile uint32_t *)((uint32_t)(GPIOA_BASE_ADDR + 0x10U))) & (1 << 3))
 
-
+/*
+ * Edge type enumerable for detecting pin state.
+ */
+typedef enum EdgeType {
+	EDGE_TYPE_NONE = 0,
+	EDGE_TYPE_RISE = 1,
+	EDGE_TYPE_FALL = 2
+} EDGE_TYPE;
+/*
+ * Function for detecting edge.
+ */
+EDGE_TYPE edgeDetect(uint8_t pin_state, uint8_t samples);
 #endif /* ASSIGNMENT_H_ */
