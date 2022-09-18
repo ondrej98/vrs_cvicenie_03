@@ -88,7 +88,7 @@ int main(void) {
 				LED_ON;
 			ledOldState = ledOldState == 0 ? 1 : 0;
 		}
-//		LL_mDelay(50);
+		LL_mDelay(1);
 	}
 
 }
